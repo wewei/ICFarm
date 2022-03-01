@@ -88,11 +88,11 @@ We would omit the error message in the following API declarations.
 
 ### Farming
 
-| Query | API       | Input Type          | Output Type  | Minimal Role | Description                                       |
-| ----- | --------- | ------------------- | ------------ | ------------ | ------------------------------------------------- |
-|       | `upgrade` | `()`                | `(Nat, Nat)` | Player       | Upgrade the farm, return the new height and width |
-|       | `plant`   | `([(Nat, CropId)])` | `()`         | Player       | Plant seeds at given plots                        |
-|       | `harvest` | `([Nat])`           | `Nat`        | Player       | Harvest at given plots                            |
+| Query | API       | Input Type          | Output Type            | Minimal Role | Description                                                  |
+| ----- | --------- | ------------------- | ---------------------- | ------------ | ------------------------------------------------------------ |
+|       | `upgrade` | `()`                | `(Nat, Nat)`           | Player       | Upgrade the farm, return the new height and width            |
+|       | `plant`   | `([(Nat, CropId)])` | `()`                   | Player       | Plant seeds at given plots                                   |
+|       | `harvest` | `([Nat])`           | `[(CropId, Nat, Nat)]` | Player       | Harvest at given plots, return the gained products and seeds |
 
 ### Visiting
 
