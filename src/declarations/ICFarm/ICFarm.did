@@ -1,6 +1,8 @@
 service : {
   addGameMasters: (vec principal) -> (vec principal);
+  claimOwner: () -> (principal);
   listGameMasters: () -> (vec principal) query;
   removeGameMasters: (vec principal) -> (vec principal);
   resignGameMaster: () -> ();
+  transferOwner: (principal) -> (principal);
 }

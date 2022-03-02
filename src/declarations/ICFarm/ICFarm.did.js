@@ -5,6 +5,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Principal)],
         [],
       ),
+    'claimOwner' : IDL.Func([], [IDL.Principal], []),
     'listGameMasters' : IDL.Func([], [IDL.Vec(IDL.Principal)], ['query']),
     'removeGameMasters' : IDL.Func(
         [IDL.Vec(IDL.Principal)],
@@ -12,6 +13,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'resignGameMaster' : IDL.Func([], [], []),
+    'transferOwner' : IDL.Func([IDL.Principal], [IDL.Principal], []),
   });
 };
 export const init = ({ IDL }) => { return []; };
