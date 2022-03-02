@@ -1,3 +1,6 @@
+type Branch<K, V> = {left : Trie<K, V>; right : Trie<K, V>; size : Nat};
+type Leaf<K, V> = {keyvals : AssocList/1<Key<K>, V>; size : Nat};
 actor {
-  
+  stable var gameMasters :
+    {#branch : Branch<Principal, ()>; #empty; #leaf : Leaf<Principal, ()>}
 };

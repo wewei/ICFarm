@@ -5,8 +5,8 @@
 | Type        | Property       | Type                            | Description                                        |
 | ----------- | -------------- | ------------------------------- | -------------------------------------------------- |
 | `GameState` |                |                                 | The overall game state                             |
-|             | `crops`        | `[Crop]`                        | A list of registered crops                         |
-|             | `plots`        | `[Plot]`                        | A list of plots                                    |
+|             | `crops`        | `TrieMap<Nat, Crop>`            | A list of registered crops                         |
+|             | `plots`        | `TrieMap<Nat, Plot>`            | A list of plots                                    |
 |             | `players`      | `TrieMap<Principal, Player>`    | A map from the principal to the player             |
 |             | `inventories`  | `TrieMap<Principal, Inventory>` | A map from the principal to the player's inventory |
 |             | `market`       | `Market`                        | The market place                                   |
@@ -35,7 +35,7 @@
 |             | `tokens`       | `Nat`                           | The number of tokens hold by the player            |
 |             | `crops`        | `[(Nat, Nat)]`                  | The (products, seeds) of crops owned by the player |
 | `Plot`      |                |                                 | A square field to plant crops                      |
-|             | `cropId`       | `Nat`                           | The ID of the planted crop, `null` for empty plot  |
+|             | `cropId`       | `?Nat`                          | The ID of the planted crop, `null` for empty plot  |
 |             | `timestamp`    | `Time`                          | The timestamp of the most recent crop change       |
 
 ## API
@@ -53,7 +53,7 @@
 The output of all APIs are supposed to have `Result<Out, Text>` type. They would return a `Text` message on error cases.
 We would omit the error message in the following API declarations.
 
-### Game Master Management
+### Authorization
 
 | API                 | Role/Parameter | Type          | Description                                 |
 | ------------------- | -------------- | ------------- | ------------------------------------------- |

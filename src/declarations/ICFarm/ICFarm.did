@@ -1,3 +1,6 @@
 service : {
-  greet: (text) -> (text);
+  addGameMasters: (vec principal) -> (vec principal);
+  listGameMasters: () -> (vec principal) query;
+  removeGameMasters: (vec principal) -> (vec principal);
+  resignGameMaster: () -> ();
 }
