@@ -1,8 +1,38 @@
+type CropPhase = 
+ record {
+   image: text;
+   name: text;
+   period: nat;
+ };
+type Crop = 
+ record {
+   phases: vec CropPhase;
+   productImage: text;
+   productName: text;
+   productPrice: nat;
+   productRange: record {
+                   nat;
+                   nat;
+                 };
+   seedImage: text;
+   seedName: text;
+   seedPrice: nat;
+   seedRange: record {
+                nat;
+                nat;
+              };
+ };
 service : {
+  addCrop: (Crop) -> (nat);
   addGameMasters: (vec principal) -> (vec principal);
   claimOwner: () -> (principal);
+  getCrops: () -> (vec record {
+                         nat;
+                         Crop;
+                       }) query;
   listGameMasters: () -> (vec principal) query;
   removeGameMasters: (vec principal) -> (vec principal);
   resignGameMaster: () -> ();
   transferOwner: (principal) -> (principal);
+  updateCrop: (nat, Crop) -> ();
 }

@@ -75,17 +75,17 @@ We would omit the error message in the following API declarations.
 
 ### Crop Management
 
-| API          | Role/Parameter | Type     | Description                       |
-| ------------ | -------------- | -------- | --------------------------------- |
-| `addCrop`    | Game Master    | _Update_ | Add a new type of crop            |
-|              | `crop`         | `Crop`   | The crop descriptor               |
-|              | `->`           | `Nat`    | The ID of the new crop type       |
-| `updateCrop` | Game Master    | _Update_ | Update a registered crop          |
-|              | `cropId`       | `Nat`    | The ID of the crop type to update |
-|              | `crop`         | `Crop`   | The updated descriptor            |
-|              | `->`           | `()`     |                                   |
-| `getCrops`   | Player         | _Query_  | Get information of all crop types |
-|              | `->`           | `[Crop]` | The crop descriptors              |
+| API          | Role/Parameter | Type            | Description                       |
+| ------------ | -------------- | --------------- | --------------------------------- |
+| `addCrop`    | Game Master    | _Update_        | Add a new type of crop            |
+|              | `crop`         | `Crop`          | The crop descriptor               |
+|              | `->`           | `Nat`           | The ID of the new crop type       |
+| `updateCrop` | Game Master    | _Update_        | Update a registered crop          |
+|              | `cropId`       | `Nat`           | The ID of the crop type to update |
+|              | `crop`         | `Crop`          | The updated descriptor            |
+|              | `->`           | `()`            |                                   |
+| `getCrops`   | Player         | _Query_         | Get information of all crop types |
+|              | `->`           | `[(Nat, Crop)]` | The crop ID and descriptors       |
 
 ### Market Management
 

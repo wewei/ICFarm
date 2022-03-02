@@ -1,6 +1,20 @@
 type Branch<K, V> = {left : Trie<K, V>; right : Trie<K, V>; size : Nat};
+type Crop =
+  {
+    phases : [CropPhase];
+    productImage : Text;
+    productName : Text;
+    productPrice : Nat;
+    productRange : (Nat, Nat);
+    seedImage : Text;
+    seedName : Text;
+    seedPrice : Nat;
+    seedRange : (Nat, Nat)
+  };
 type Leaf<K, V> = {keyvals : AssocList/1<Key<K>, V>; size : Nat};
 actor {
+  stable var crops :
+    {#branch : Branch<Nat, Crop>; #empty; #leaf : Leaf<Nat, Crop>};
   stable var gameMasters :
     {#branch : Branch<Principal, ()>; #empty; #leaf : Leaf<Principal, ()>};
   stable var owner : Principal

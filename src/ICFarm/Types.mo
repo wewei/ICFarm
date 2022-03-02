@@ -1,7 +1,7 @@
 import Time "mo:base/Time";
 
 module {
-  type Crop = {
+  public type Crop = {
     productName: Text;
     productImage: Text;
     productRange: (Nat, Nat);
@@ -13,28 +13,28 @@ module {
     phases: [CropPhase];
   };
 
-  type CropPhase = {
+  public type CropPhase = {
     name: Text;
     image: Text;
     period: Nat;
   };
 
-  type Market = {
+  public type Market = {
     cropPrices: [(Nat, Nat)];
   };
 
-  type Player = {
+  public type Player = {
     name: Text;
     avatar: Text;
     plotIds: [Nat];
   };
 
-  type Inventory = {
+  public type Inventory = {
     tokens: Nat;
     crops: [(Nat, Nat)];
   };
 
-  type Plot = {
+  public type Plot = {
     cropId: ?Nat;
     timestamp: Time.Time;
   };
