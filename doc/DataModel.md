@@ -42,11 +42,11 @@
 
 ### Roles
 
-| Role        | Perm Level | Description                                               |
-| ----------- | ---------- | --------------------------------------------------------- |
-| Player      | 0          | Ordinary player                                           |
-| Game master | 1          | To tune the parameters, and to grant other game masters   |
-| Owner       | 2          | The all mighty super user, who deployed the game canister |
+| Role        | Perm Level | Description                                             |
+| ----------- | ---------- | ------------------------------------------------------- |
+| Player      | 0          | Ordinary player                                         |
+| Game master | 1          | To tune the parameters, and to grant other game masters |
+| Owner       | 2          | The all mighty super user                               |
 
 ### Error handling
 
@@ -55,18 +55,23 @@ We would omit the error message in the following API declarations.
 
 ### Authorization
 
-| API                 | Role/Parameter | Type          | Description                                 |
-| ------------------- | -------------- | ------------- | ------------------------------------------- |
-| `addGameMasters`    | Game Master    | _Update_      | Add a set of game masters                   |
-|                     | `userIds`      | `[Principal]` | The principals of the new game masters      |
-|                     | `->`           | `[Principal]` | The principals of newly added game masters  |
-| `resignGameMaster`  | Game Master    | _Update_      | Resign as a game master                     |
-|                     | `->`           | `()`          |                                             |
-| `removeGameMasters` | Owner          | _Update_      | Remove a set of game masters                |
-|                     | `userIds`      | `[Principal]` | The principals of the removing game masters |
-|                     | `->`           | `[Principal]` | The principals of removed game masters      |
-| `listGameMasters`   | Game Master    | _Query_       | List the game masters                       |
-|                     | `->`           | `[Principal]` | The principals of the game masters          |
+| API                 | Role/Parameter | Type          | Description                                  |
+| ------------------- | -------------- | ------------- | -------------------------------------------- |
+| `claimOwner`        | Anyone         | _Update_      | Claim to be owner of the game                |
+|                     | `->`           | `Principal`   | The principal of the game owner              |
+| `transferOwner`     | Owner          | _Update_      | Transfer the game owner role to other player |
+|                     | `userId`       | `Principal`   | The principal of the new owner               |
+|                     | `->`           | `Principal`   | The principal of the game owner              |
+| `addGameMasters`    | Game Master    | _Update_      | Add a set of game masters                    |
+|                     | `userIds`      | `[Principal]` | The principals of the new game masters       |
+|                     | `->`           | `[Principal]` | The principals of newly added game masters   |
+| `resignGameMaster`  | Game Master    | _Update_      | Resign as a game master                      |
+|                     | `->`           | `()`          |                                              |
+| `removeGameMasters` | Owner          | _Update_      | Remove a set of game masters                 |
+|                     | `userIds`      | `[Principal]` | The principals of the removing game masters  |
+|                     | `->`           | `[Principal]` | The principals of removed game masters       |
+| `listGameMasters`   | Game Master    | _Query_       | List the game masters                        |
+|                     | `->`           | `[Principal]` | The principals of the game masters           |
 
 ### Crop Management
 
