@@ -94,7 +94,7 @@ actor ICFarm {
   // API
   public shared({ caller }) func addCrop(crop: Types.Crop): async Nat {
     assert(isOwnerOrGameMaster(caller));
-    
+
     let cropId = Trie.size(crops);
     crops := natMap.putKeyValue<Types.Crop>(crops, cropId, crop);
     cropId
@@ -102,12 +102,33 @@ actor ICFarm {
 
   public shared({ caller }) func updateCrop(cropId: Nat, crop: Types.Crop): async () {
     assert(isOwnerOrGameMaster(caller));
+    assert(cropId < Trie.size(crops));
 
     crops := natMap.putKeyValue<Types.Crop>(crops, cropId, crop);
   };
 
   public shared query({ caller }) func getCrops(): async [(Nat, Types.Crop)] {
     natMap.entries<Types.Crop>(crops)
+  };
+
+  /********************
+    Market Management
+  ********************/
+
+  // State
+  stable var cropPrices: Trie.Trie<Nat, (Nat, Nat)> = Trie.empty();
+
+  // API
+  public shared({ caller }) func updatePrices(cropId: Nat, prices: (Nat, Nat)): async () {
+    assert(isOwnerOrGameMaster(caller));
+    assert(cropId < Trie.size(crops));
+
+    cropPrices := natMap.putKeyValue<(Nat, Nat)>(cropPrices, cropId, prices);
+  };
+
+  public shared query({ caller }) func getPrices(): async [(Nat, (Nat, Nat))] {
+    natMap.entries<(Nat, Nat)>(cropPrices)
+
   };
 
 };

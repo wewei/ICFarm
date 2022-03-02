@@ -30,9 +30,20 @@ service : {
                          nat;
                          Crop;
                        }) query;
+  getPrices: () -> (vec record {
+                          nat;
+                          record {
+                            nat;
+                            nat;
+                          };
+                        }) query;
   listGameMasters: () -> (vec principal) query;
   removeGameMasters: (vec principal) -> (vec principal);
   resignGameMaster: () -> ();
   transferOwner: (principal) -> (principal);
   updateCrop: (nat, Crop) -> ();
+  updatePrices: (nat, record {
+                        nat;
+                        nat;
+                      }) -> ();
 }

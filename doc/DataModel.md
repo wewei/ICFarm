@@ -89,14 +89,14 @@ We would omit the error message in the following API declarations.
 
 ### Market Management
 
-| API            | Role/Parameter | Type           | Description                           |
-| -------------- | -------------- | -------------- | ------------------------------------- |
-| `updatePrices` | Game Master    | _Update_       | Update the product and seed price     |
-|                | `cropId`       | `Nat`          | The ID of the crop to update          |
-|                | `prices`       | `(Nat, Nat)`   | The product and seed prices in tokens |
-|                | `->`           | `()`           |                                       |
-| `getPrices`    | Player         | _Query_        | Get the prices of all corps           |
-|                | `->`           | `[(Nat, Nat)]` | The product and seed prices           |
+| API            | Role/Parameter | Type                 | Description                                |
+| -------------- | -------------- | -------------------- | ------------------------------------------ |
+| `updatePrices` | Game Master    | _Update_             | Update the product and seed price          |
+|                | `cropId`       | `Nat`                | The ID of the crop to update               |
+|                | `prices`       | `(Nat, Nat)`         | The product and seed prices in tokens      |
+|                | `->`           | `()`                 |                                            |
+| `getPrices`    | Player         | _Query_              | Get the prices of all corps                |
+|                | `->`           | `[(Nat (Nat, Nat))]` | The crop ID and the (product, seed) prices |
 
 ### Trade
 

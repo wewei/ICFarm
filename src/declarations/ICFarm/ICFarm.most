@@ -13,6 +13,12 @@ type Crop =
   };
 type Leaf<K, V> = {keyvals : AssocList/1<Key<K>, V>; size : Nat};
 actor {
+  stable var cropPrices :
+    {
+      #branch : Branch<Nat, (Nat, Nat)>;
+      #empty;
+      #leaf : Leaf<Nat, (Nat, Nat)>
+    };
   stable var crops :
     {#branch : Branch<Nat, Crop>; #empty; #leaf : Leaf<Nat, Crop>};
   stable var gameMasters :

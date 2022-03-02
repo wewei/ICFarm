@@ -20,9 +20,13 @@ export interface _SERVICE {
   'addGameMasters' : (arg_0: Array<Principal>) => Promise<Array<Principal>>,
   'claimOwner' : () => Promise<Principal>,
   'getCrops' : () => Promise<Array<[bigint, Crop]>>,
+  'getPrices' : () => Promise<Array<[bigint, [bigint, bigint]]>>,
   'listGameMasters' : () => Promise<Array<Principal>>,
   'removeGameMasters' : (arg_0: Array<Principal>) => Promise<Array<Principal>>,
   'resignGameMaster' : () => Promise<undefined>,
   'transferOwner' : (arg_0: Principal) => Promise<Principal>,
   'updateCrop' : (arg_0: bigint, arg_1: Crop) => Promise<undefined>,
+  'updatePrices' : (arg_0: bigint, arg_1: [bigint, bigint]) => Promise<
+      undefined
+    >,
 }

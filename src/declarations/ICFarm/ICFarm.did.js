@@ -24,6 +24,11 @@ export const idlFactory = ({ IDL }) => {
       ),
     'claimOwner' : IDL.Func([], [IDL.Principal], []),
     'getCrops' : IDL.Func([], [IDL.Vec(IDL.Tuple(IDL.Nat, Crop))], ['query']),
+    'getPrices' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Tuple(IDL.Nat, IDL.Nat)))],
+        ['query'],
+      ),
     'listGameMasters' : IDL.Func([], [IDL.Vec(IDL.Principal)], ['query']),
     'removeGameMasters' : IDL.Func(
         [IDL.Vec(IDL.Principal)],
@@ -33,6 +38,7 @@ export const idlFactory = ({ IDL }) => {
     'resignGameMaster' : IDL.Func([], [], []),
     'transferOwner' : IDL.Func([IDL.Principal], [IDL.Principal], []),
     'updateCrop' : IDL.Func([IDL.Nat, Crop], [], []),
+    'updatePrices' : IDL.Func([IDL.Nat, IDL.Tuple(IDL.Nat, IDL.Nat)], [], []),
   });
 };
 export const init = ({ IDL }) => { return []; };
