@@ -127,10 +127,14 @@ We would omit the error message in the following API declarations.
 |           | `plotIds`      | `[Nat]`                  | The IDs of the plots to query                                           |
 |           | `->`           | `[(Nat, Plot)]`          | The plot states in form of `(plotId, Plot)` tuples                      |
 
-### Visiting
+### Player Profile Access
 
 | API           | Role/Parameter | Type        | Description                          |
 | ------------- | -------------- | ----------- | ------------------------------------ |
-| `playerState` | Player         | _Query_     | Get the public state of a player     |
+| `queryPlayer` | Player         | _Query_     | Get the public state of a player     |
 |               | `userId`       | `Principal` | The principal of the player to visit |
 |               | `->`           | `Play`      | The information of the player        |
+| `initPlayer`  | Player         | _Update_    | Initiate the player information      |
+|               | `name`         | `Text`      | The name of the player               |
+|               | `avatar`       | `Text`      | The URL to the avatar of the player  |
+|               | `->`           | `Player`    | The state of the player              |

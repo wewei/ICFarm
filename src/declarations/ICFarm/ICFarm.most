@@ -1,17 +1,9 @@
 type Branch<K, V> = {left : Trie<K, V>; right : Trie<K, V>; size : Nat};
-type Crop =
-  {
-    phases : [CropPhase];
-    productImage : Text;
-    productName : Text;
-    productPrice : Nat;
-    productRange : (Nat, Nat);
-    seedImage : Text;
-    seedName : Text;
-    seedPrice : Nat;
-    seedRange : (Nat, Nat)
-  };
+type Crop/1 = Crop;
+type Inventory/1 = Inventory;
 type Leaf<K, V> = {keyvals : AssocList/1<Key<K>, V>; size : Nat};
+type Player/1 = Player;
+type Plot/1 = Plot;
 actor {
   stable var cropPrices :
     {
@@ -20,8 +12,24 @@ actor {
       #leaf : Leaf<Nat, (Nat, Nat)>
     };
   stable var crops :
-    {#branch : Branch<Nat, Crop>; #empty; #leaf : Leaf<Nat, Crop>};
+    {#branch : Branch<Nat, Crop/1>; #empty; #leaf : Leaf<Nat, Crop/1>};
   stable var gameMasters :
     {#branch : Branch<Principal, ()>; #empty; #leaf : Leaf<Principal, ()>};
-  stable var owner : Principal
+  stable var inventories :
+    {
+      #branch : Branch<Principal, Inventory/1>;
+      #empty;
+      #leaf : Leaf<Principal, Inventory/1>
+    };
+  stable var owner : Principal;
+  stable var players :
+    {
+      #branch : Branch<Principal, Player/1>;
+      #empty;
+      #leaf : Leaf<Principal, Player/1>
+    };
+  stable var plotOwners :
+    {#branch : Branch<Nat, Principal>; #empty; #leaf : Leaf<Nat, Principal>};
+  stable var plots :
+    {#branch : Branch<Nat, Plot/1>; #empty; #leaf : Leaf<Nat, Plot/1>}
 };

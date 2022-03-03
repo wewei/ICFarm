@@ -12,6 +12,7 @@ module {
     keys: <V>(Map<K, V>) -> [K];
     values: <V>(Map<K, V>) -> [V];
     entries: <V>(Map<K, V>) -> [(K, V)];
+    putMapping: <V>(K -> V) -> (Map<K, V>, K) -> Map<K, V>;
   } = object {
 
     public func putKeyValue<V>(map: Map<K, V>, key: K, value: V): Map<K, V> {
@@ -41,6 +42,10 @@ module {
 
     public func entries<V>(map: Map<K, V>): [(K, V)] {
       Trie.toArray<K, V, (K, V)>(map, func (k, v) = (k, v))
+    };
+
+    public func putMapping<V>(mapping: K -> V): (Map<K, V>, K) -> Map<K, V> {
+      func (map, key) = putKeyValue(map, key, mapping(key))
     };
   };
 }

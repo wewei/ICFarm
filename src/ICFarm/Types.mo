@@ -1,6 +1,9 @@
 import Time "mo:base/Time";
+import Trie "mo:base/Trie";
 
 module {
+  type Map<K, V> = Trie.Trie<K, V>;
+
   public type Crop = {
     productName: Text;
     productImage: Text;
@@ -19,10 +22,6 @@ module {
     period: Nat;
   };
 
-  public type Market = {
-    cropPrices: [(Nat, Nat)];
-  };
-
   public type Player = {
     name: Text;
     avatar: Text;
@@ -31,11 +30,12 @@ module {
 
   public type Inventory = {
     tokens: Nat;
-    crops: [(Nat, Nat)];
+    crops: Map<Nat, (Nat, Nat)>;
   };
 
   public type Plot = {
     cropId: ?Nat;
     timestamp: Time.Time;
   };
+
 }
