@@ -44,15 +44,29 @@ actor ICFarm {
   let INIT_PLOTS = 8;
   let INIT_TOKENS = 1000;
 
-  /********************
-      Authorizaton
-  ********************/
+  // Error codes
+  let ERR_NOT_IMPLEMENTED = "ERR_NOT_IMPLEMENTED";
+  let ERR_UNAUTHORIZED = "ERR_UNAUTHORIZED";
+  let ERR_INVALID_USER = "ERR_INVALID_USER";
+  let ERR_CANNOT_RESIGN = "ERR_CANNOT_RESIGN";
+  let ERR_USER_EXISTS = "ERR_USER_EXISTS";
+  let ERR_USER_NOT_FOUND = "ERR_USER_NOT_FOUND";
+  let ERR_INVALID_CROP = "ERR_INVALID_CROP";
 
   // State
   stable var owner: Principal = Principal.fromBlob("\04");
   stable var gameMasters: Set<Principal> = TrieSet.empty();
+  stable var crops: Map<Nat, Crop> = emptyMap();
+  stable var cropPrices: Map<Nat, (Nat, Nat)> = emptyMap();
+  stable var plotOwners: Map<Nat, Principal> = emptyMap();
+  stable var plots: Map<Nat, Plot> = emptyMap();
+  stable var players: Map<Principal, Player> = emptyMap();
+  stable var inventories: Map<Principal, Inventory> = emptyMap();
 
   // Helpers
+  private let natMap = LT.forKey<Nat>(Hash.hash, Nat.equal);
+  private let userMap = LT.forKey<Principal>(Principal.hash, Principal.equal);
+
   private let comparePrincipal = LC.Unordered<Principal>(Principal.equal);
   private let principalSet = LTS.forType<Principal>(Principal.hash, Principal.equal);
 
@@ -64,109 +78,6 @@ actor ICFarm {
     (isOwner)
     (isGameMaster);
 
-  // API
-  public shared query({ caller }) func listGameMasters() : async [Principal] {
-    assert(not isAnonymous(caller));
-
-    TrieSet.toArray(gameMasters)
-  };
-
-  public shared({ caller }) func claimOwner() : async Principal {
-    assert(not isAnonymous(caller));
-    assert(isAnonymous(owner));
-
-    owner := caller;
-    caller
-  };
-
-  public shared({ caller }) func transferOwner(userId: Principal): async Principal {
-    assert(isOwner(caller));
-    assert(not Principal.isAnonymous(userId));
-
-    owner := userId;
-    userId
-  };
-
-  public shared({ caller }) func addGameMasters(userIds: [Principal]) : async [Principal] {
-    assert(isOwnerOrGameMaster(caller));
-
-    let newGameMasters: [Principal] = filter(userIds, LL.neither<Principal>(isGameMaster)(isAnonymous));
-    gameMasters := foldLeft(newGameMasters, gameMasters, principalSet.addElement);
-    newGameMasters
-  };
-
-  public shared({ caller }) func removeGameMasters(userIds: [Principal]) : async [Principal] {
-    assert(isOwner(caller));
-
-    let removingGameMasters: [Principal] = filter(userIds, isGameMaster);
-    gameMasters := foldLeft(removingGameMasters, gameMasters, principalSet.delElement);
-    removingGameMasters
-  };
-
-  public shared({ caller }) func resignGameMaster() : async () {
-    assert(isOwnerOrGameMaster(caller));
-
-    gameMasters := principalSet.delElement(gameMasters, caller);
-  };
-
-  /********************
-     Crop Management
-  ********************/
-
-  // State
-  stable var crops: Map<Nat, Crop> = emptyMap();
-
-  // Helpers
-  private let natMap = LT.forKey<Nat>(Hash.hash, Nat.equal);
-
-  // API
-  public shared({ caller }) func addCrop(crop: Crop): async Nat {
-    assert(isOwnerOrGameMaster(caller));
-
-    let cropId = mapSize(crops);
-    crops := natMap.putKeyValue<Crop>(crops, cropId, crop);
-    cropId
-  };
-
-  public shared({ caller }) func updateCrop(cropId: Nat, crop: Crop): async () {
-    assert(isOwnerOrGameMaster(caller));
-    assert(cropId < mapSize(crops));
-
-    crops := natMap.putKeyValue<Crop>(crops, cropId, crop);
-  };
-
-  public shared query({ caller }) func getCrops(): async [(Nat, Crop)] {
-    natMap.entries<Crop>(crops)
-  };
-
-  /********************
-    Market Management
-  ********************/
-
-  // State
-  stable var cropPrices: Map<Nat, (Nat, Nat)> = emptyMap();
-
-  // API
-  public shared({ caller }) func updatePrices(cropId: Nat, prices: (Nat, Nat)): async () {
-    assert(isOwnerOrGameMaster(caller));
-    assert(cropId < mapSize(crops));
-
-    cropPrices := natMap.putKeyValue<(Nat, Nat)>(cropPrices, cropId, prices);
-  };
-
-  public shared query({ caller }) func getPrices(): async [(Nat, (Nat, Nat))] {
-    natMap.entries<(Nat, Nat)>(cropPrices)
-  };
-
-  /********************
-    Plot Management
-  ********************/
-
-  // State
-  stable var plotOwners: Map<Nat, Principal> = emptyMap();
-  stable var plots: Map<Nat, Plot> = emptyMap();
-
-  // Helpers
   private func allocatePlots(owner: Principal, count: Nat): [Nat] {
     let s = mapSize(plots);
     let newPlots = Array.tabulate<Nat>(count, func (i) = s + i);
@@ -185,28 +96,137 @@ actor ICFarm {
     newPlots
   };
 
-  public shared query({ caller }) func queryPlots(plotIds: [Nat]): async [(Nat, ?Plot)] {
-    Array.map<Nat, (Nat, ?Plot)>(plotIds, func (id) = (id, natMap.getValue<Plot>(plots, id)))
-  };
-
-  /********************
-   Inventory Management
-  ********************/
-
-  // State
-  stable var inventories: Map<Principal, Inventory> = emptyMap();
-
-  // Helper
   private func initInventory(userId: Principal): Inventory {
     let inventory = { tokens = INIT_TOKENS; crops = emptyMap() };
     inventories := userMap.putKeyValue<Inventory>(inventories, userId, inventory);
     inventory
   };
 
+  // API
+
+  /********************
+      Authorizaton
+  ********************/
+
+  public shared query({ caller }) func listGameMasters() : async R<[Principal]> {
+    if (isAnonymous(caller)) {
+      #err(ERR_UNAUTHORIZED)
+    } else {
+      #ok(TrieSet.toArray(gameMasters))
+    }
+  };
+
+  public shared({ caller }) func claimOwner() : async R<Principal> {
+    if (isAnonymous(caller) or not isAnonymous(owner)) {
+      #err(ERR_UNAUTHORIZED)
+    } else {
+      owner := caller;
+      #ok(caller)
+    }
+  };
+
+  public shared({ caller }) func transferOwner(userId: Principal): async R<Principal> {
+    if (not isOwner(caller)) {
+      #err(ERR_UNAUTHORIZED)
+    } else if (isAnonymous(userId)) {
+      #err(ERR_INVALID_USER)
+    } else {
+      owner := userId;
+      #ok(userId)
+    }
+  };
+
+  public shared({ caller }) func addGameMasters(userIds: [Principal]) : async R<[Principal]> {
+    if (not isOwnerOrGameMaster(caller)) {
+      #err(ERR_UNAUTHORIZED)
+    } else {
+      let newGameMasters: [Principal] = filter(userIds, LL.neither<Principal>(isGameMaster)(isAnonymous));
+      gameMasters := foldLeft(newGameMasters, gameMasters, principalSet.addElement);
+      #ok(newGameMasters)
+    }
+  };
+
+  public shared({ caller }) func removeGameMasters(userIds: [Principal]) : async R<[Principal]> {
+    if (not isOwner(caller)) {
+      #err(ERR_UNAUTHORIZED)
+    } else {
+      let removingGameMasters: [Principal] = filter(userIds, isGameMaster);
+      gameMasters := foldLeft(removingGameMasters, gameMasters, principalSet.delElement);
+      #ok(removingGameMasters)
+    }
+  };
+
+  public shared({ caller }) func resignGameMaster() : async R<()> {
+    if (isOwner(caller)) {
+      #err(ERR_CANNOT_RESIGN)
+    } else if (not isGameMaster(caller)) {
+      #err(ERR_UNAUTHORIZED)
+    } else {
+      gameMasters := principalSet.delElement(gameMasters, caller);
+      #ok()
+    }
+  };
+
+  /********************
+     Crop Management
+  ********************/
+
+  public shared({ caller }) func addCrop(crop: Crop): async R<Nat> {
+    if (not isOwnerOrGameMaster(caller)) {
+      #err(ERR_UNAUTHORIZED)
+    } else {
+      let cropId = mapSize(crops);
+      crops := natMap.putKeyValue<Crop>(crops, cropId, crop);
+      #ok(cropId)
+    }
+  };
+
+  public shared({ caller }) func updateCrop(cropId: Nat, crop: Crop): async R<()> {
+    if (not isOwnerOrGameMaster(caller)) {
+      #err(ERR_UNAUTHORIZED)
+    } else if (cropId >= mapSize(crops)) {
+      #err(ERR_INVALID_CROP)
+    } else {
+      crops := natMap.putKeyValue<Crop>(crops, cropId, crop);
+      #ok()
+    }
+  };
+
+  public shared query({ caller }) func getCrops(): async R<[(Nat, Crop)]> {
+    #ok(natMap.entries<Crop>(crops))
+  };
+
+  /********************
+    Market Management
+  ********************/
+
+  public shared({ caller }) func updatePrices(cropId: Nat, prices: (Nat, Nat)): async R<()> {
+    if (not isOwnerOrGameMaster(caller)) {
+      #err(ERR_UNAUTHORIZED)
+    } else if (cropId >= mapSize(crops)) {
+      #err(ERR_INVALID_CROP)
+    } else {
+      cropPrices := natMap.putKeyValue<(Nat, Nat)>(cropPrices, cropId, prices);
+      #ok()
+    }
+  };
+
+  public shared query({ caller }) func getPrices(): async R<[(Nat, (Nat, Nat))]> {
+    #ok(natMap.entries<(Nat, Nat)>(cropPrices))
+  };
+
+  /********************
+    Plot Management
+  ********************/
+
+  public shared query({ caller }) func queryPlots(plotIds: [Nat]): async R<[(Nat, ?Plot)]> {
+    #ok(Array.map<Nat, (Nat, ?Plot)>(plotIds, func (id) = (id, natMap.getValue<Plot>(plots, id))))
+  };
+
   /********************
         Trade
   ********************/
-  // API
+
   public shared({ caller }) func buy(list: [(Nat, Nat, Nat)], tokens: Nat): async R<Nat> {
     #err("ERR_NOT_IMPLEMENTED")
   };
@@ -219,19 +239,10 @@ actor ICFarm {
     #err("ERR_NOT_IMPLEMENTED")
   };
 
-
-
   /********************
       Player Access
   ********************/
 
-  // State
-  stable var players: Map<Principal, Player> = emptyMap();
-
-  // Helpers
-  private let userMap = LT.forKey<Principal>(Principal.hash, Principal.equal);
-
-  // API
   public shared query({ caller }) func queryPlayer(userId: Principal): async R<Player> {
     switch (userMap.getValue<Player>(players, userId)) {
       case (?player) { #ok(player) };
@@ -255,7 +266,6 @@ actor ICFarm {
         Farming
   ********************/
 
-  // API
   public shared({ caller }) func plant(tasks: [(Nat, Nat)]): async R<[(Nat, Nat)]> {
     #err("ERR_NOT_IMPLEMENTED")
   };

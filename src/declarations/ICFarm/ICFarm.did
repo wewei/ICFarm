@@ -5,7 +5,7 @@ type Trie =
    leaf: Leaf;
  };
 type Time = int;
-type R_5 = 
+type R_9 = 
  variant {
    err: text;
    ok: vec record {
@@ -15,7 +15,7 @@ type R_5 =
              nat;
            };
  };
-type R_4 = 
+type R_8 = 
  variant {
    err: text;
    ok: record {
@@ -23,12 +23,12 @@ type R_4 =
          Inventory;
        };
  };
-type R_3 = 
+type R_7 = 
  variant {
    err: text;
    ok: Inventory;
  };
-type R_2 = 
+type R_6 = 
  variant {
    err: text;
    ok: vec record {
@@ -36,15 +36,57 @@ type R_2 =
              nat;
            };
  };
-type R_1 = 
+type R_5 = 
  variant {
    err: text;
    ok: Player;
  };
-type R = 
+type R_4 = 
+ variant {
+   err: text;
+   ok: vec record {
+             nat;
+             opt Plot;
+           };
+ };
+type R_3 = 
+ variant {
+   err: text;
+   ok: vec principal;
+ };
+type R_2 = 
  variant {
    err: text;
    ok: nat;
+ };
+type R_11 = 
+ variant {
+   err: text;
+   ok: vec record {
+             nat;
+             Crop;
+           };
+ };
+type R_10 = 
+ variant {
+   err: text;
+   ok: vec record {
+             nat;
+             record {
+               nat;
+               nat;
+             };
+           };
+ };
+type R_1 = 
+ variant {
+   err: text;
+   ok: principal;
+ };
+type R = 
+ variant {
+   err: text;
+   ok;
  };
 type Plot = 
  record {
@@ -132,49 +174,37 @@ type AssocList =
        List;
      };
 service : {
-  addCrop: (Crop) -> (nat);
-  addGameMasters: (vec principal) -> (vec principal);
+  addCrop: (Crop) -> (R_2);
+  addGameMasters: (vec principal) -> (R_3);
   buy: (vec record {
               nat;
               nat;
               nat;
-            }, nat) -> (R);
-  claimOwner: () -> (principal);
-  getCrops: () -> (vec record {
-                         nat;
-                         Crop;
-                       }) query;
-  getPrices: () -> (vec record {
-                          nat;
-                          record {
-                            nat;
-                            nat;
-                          };
-                        }) query;
-  harvest: (vec nat) -> (R_5);
-  initPlayer: (text, text) -> (R_4);
-  inventory: () -> (R_3) query;
-  listGameMasters: () -> (vec principal) query;
+            }, nat) -> (R_2);
+  claimOwner: () -> (R_1);
+  getCrops: () -> (R_11) query;
+  getPrices: () -> (R_10) query;
+  harvest: (vec nat) -> (R_9);
+  initPlayer: (text, text) -> (R_8);
+  inventory: () -> (R_7) query;
+  listGameMasters: () -> (R_3) query;
   plant: (vec record {
                 nat;
                 nat;
-              }) -> (R_2);
-  queryPlayer: (principal) -> (R_1) query;
-  queryPlots: (vec nat) -> (vec record {
-                                  nat;
-                                  opt Plot;
-                                }) query;
-  removeGameMasters: (vec principal) -> (vec principal);
-  resignGameMaster: () -> ();
+              }) -> (R_6);
+  queryPlayer: (principal) -> (R_5) query;
+  queryPlots: (vec nat) -> (R_4) query;
+  removeGameMasters: (vec principal) -> (R_3);
+  resignGameMaster: () -> (R);
   sell: (vec record {
                nat;
                nat;
                nat;
-             }, nat) -> (R);
-  transferOwner: (principal) -> (principal);
-  updateCrop: (nat, Crop) -> ();
+             }, nat) -> (R_2);
+  transferOwner: (principal) -> (R_1);
+  updateCrop: (nat, Crop) -> (R);
   updatePrices: (nat, record {
                         nat;
                         nat;
-                      }) -> ();
+                      }) -> (R);
 }
