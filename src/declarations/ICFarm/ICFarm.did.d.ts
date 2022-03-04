@@ -31,15 +31,17 @@ export interface Player {
   'avatar' : string,
 }
 export interface Plot { 'cropId' : [] | [bigint], 'timestamp' : Time }
-export type Result = { 'ok' : bigint } |
+export type R = { 'ok' : bigint } |
   { 'err' : string };
-export type Result_1 = { 'ok' : Player } |
+export type R_1 = { 'ok' : Player } |
   { 'err' : string };
-export type Result_2 = { 'ok' : Array<[bigint, bigint]> } |
+export type R_2 = { 'ok' : Array<[bigint, bigint]> } |
   { 'err' : string };
-export type Result_3 = { 'ok' : Inventory } |
+export type R_3 = { 'ok' : Inventory } |
   { 'err' : string };
-export type Result_4 = { 'ok' : Array<[bigint, bigint, bigint, bigint]> } |
+export type R_4 = { 'ok' : [Player, Inventory] } |
+  { 'err' : string };
+export type R_5 = { 'ok' : Array<[bigint, bigint, bigint, bigint]> } |
   { 'err' : string };
 export type Time = bigint;
 export type Trie = { 'branch' : Branch } |
@@ -48,25 +50,23 @@ export type Trie = { 'branch' : Branch } |
 export interface _SERVICE {
   'addCrop' : (arg_0: Crop) => Promise<bigint>,
   'addGameMasters' : (arg_0: Array<Principal>) => Promise<Array<Principal>>,
-  'buy' : (arg_0: Array<[bigint, bigint, bigint]>, arg_1: bigint) => Promise<
-      Result
-    >,
+  'buy' : (arg_0: Array<[bigint, bigint, bigint]>, arg_1: bigint) => Promise<R>,
   'claimOwner' : () => Promise<Principal>,
   'getCrops' : () => Promise<Array<[bigint, Crop]>>,
   'getPrices' : () => Promise<Array<[bigint, [bigint, bigint]]>>,
-  'harvest' : (arg_0: Array<bigint>) => Promise<Result_4>,
-  'initPlayer' : (arg_0: string, arg_1: string) => Promise<Result_1>,
-  'inventory' : () => Promise<Result_3>,
+  'harvest' : (arg_0: Array<bigint>) => Promise<R_5>,
+  'initPlayer' : (arg_0: string, arg_1: string) => Promise<R_4>,
+  'inventory' : () => Promise<R_3>,
   'listGameMasters' : () => Promise<Array<Principal>>,
-  'plant' : (arg_0: Array<[bigint, bigint]>) => Promise<Result_2>,
-  'queryPlayer' : (arg_0: Principal) => Promise<Result_1>,
+  'plant' : (arg_0: Array<[bigint, bigint]>) => Promise<R_2>,
+  'queryPlayer' : (arg_0: Principal) => Promise<R_1>,
   'queryPlots' : (arg_0: Array<bigint>) => Promise<
       Array<[bigint, [] | [Plot]]>
     >,
   'removeGameMasters' : (arg_0: Array<Principal>) => Promise<Array<Principal>>,
   'resignGameMaster' : () => Promise<undefined>,
   'sell' : (arg_0: Array<[bigint, bigint, bigint]>, arg_1: bigint) => Promise<
-      Result
+      R
     >,
   'transferOwner' : (arg_0: Principal) => Promise<Principal>,
   'updateCrop' : (arg_0: bigint, arg_1: Crop) => Promise<undefined>,

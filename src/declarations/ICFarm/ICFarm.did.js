@@ -17,8 +17,8 @@ export const idlFactory = ({ IDL }) => {
     'phases' : IDL.Vec(CropPhase),
     'productRange' : IDL.Tuple(IDL.Nat, IDL.Nat),
   });
-  const Result = IDL.Variant({ 'ok' : IDL.Nat, 'err' : IDL.Text });
-  const Result_4 = IDL.Variant({
+  const R = IDL.Variant({ 'ok' : IDL.Nat, 'err' : IDL.Text });
+  const R_5 = IDL.Variant({
     'ok' : IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat)),
     'err' : IDL.Text,
   });
@@ -27,7 +27,6 @@ export const idlFactory = ({ IDL }) => {
     'plotIds' : IDL.Vec(IDL.Nat),
     'avatar' : IDL.Text,
   });
-  const Result_1 = IDL.Variant({ 'ok' : Player, 'err' : IDL.Text });
   const Hash = IDL.Nat32;
   const Key = IDL.Record({ 'key' : IDL.Nat, 'hash' : Hash });
   List.fill(
@@ -49,11 +48,16 @@ export const idlFactory = ({ IDL }) => {
     'empty' : IDL.Null,
   });
   const Inventory = IDL.Record({ 'crops' : Map, 'tokens' : IDL.Nat });
-  const Result_3 = IDL.Variant({ 'ok' : Inventory, 'err' : IDL.Text });
-  const Result_2 = IDL.Variant({
+  const R_4 = IDL.Variant({
+    'ok' : IDL.Tuple(Player, Inventory),
+    'err' : IDL.Text,
+  });
+  const R_3 = IDL.Variant({ 'ok' : Inventory, 'err' : IDL.Text });
+  const R_2 = IDL.Variant({
     'ok' : IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat)),
     'err' : IDL.Text,
   });
+  const R_1 = IDL.Variant({ 'ok' : Player, 'err' : IDL.Text });
   const Time = IDL.Int;
   const Plot = IDL.Record({ 'cropId' : IDL.Opt(IDL.Nat), 'timestamp' : Time });
   return IDL.Service({
@@ -65,7 +69,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'buy' : IDL.Func(
         [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat, IDL.Nat)), IDL.Nat],
-        [Result],
+        [R],
         [],
       ),
     'claimOwner' : IDL.Func([], [IDL.Principal], []),
@@ -75,12 +79,12 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Tuple(IDL.Nat, IDL.Nat)))],
         ['query'],
       ),
-    'harvest' : IDL.Func([IDL.Vec(IDL.Nat)], [Result_4], []),
-    'initPlayer' : IDL.Func([IDL.Text, IDL.Text], [Result_1], []),
-    'inventory' : IDL.Func([], [Result_3], ['query']),
+    'harvest' : IDL.Func([IDL.Vec(IDL.Nat)], [R_5], []),
+    'initPlayer' : IDL.Func([IDL.Text, IDL.Text], [R_4], []),
+    'inventory' : IDL.Func([], [R_3], ['query']),
     'listGameMasters' : IDL.Func([], [IDL.Vec(IDL.Principal)], ['query']),
-    'plant' : IDL.Func([IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat))], [Result_2], []),
-    'queryPlayer' : IDL.Func([IDL.Principal], [Result_1], ['query']),
+    'plant' : IDL.Func([IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat))], [R_2], []),
+    'queryPlayer' : IDL.Func([IDL.Principal], [R_1], ['query']),
     'queryPlots' : IDL.Func(
         [IDL.Vec(IDL.Nat)],
         [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Opt(Plot)))],
@@ -94,7 +98,7 @@ export const idlFactory = ({ IDL }) => {
     'resignGameMaster' : IDL.Func([], [], []),
     'sell' : IDL.Func(
         [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat, IDL.Nat)), IDL.Nat],
-        [Result],
+        [R],
         [],
       ),
     'transferOwner' : IDL.Func([IDL.Principal], [IDL.Principal], []),

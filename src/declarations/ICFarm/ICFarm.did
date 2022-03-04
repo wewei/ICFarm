@@ -5,7 +5,7 @@ type Trie =
    leaf: Leaf;
  };
 type Time = int;
-type Result_4 = 
+type R_5 = 
  variant {
    err: text;
    ok: vec record {
@@ -15,12 +15,20 @@ type Result_4 =
              nat;
            };
  };
-type Result_3 = 
+type R_4 = 
+ variant {
+   err: text;
+   ok: record {
+         Player;
+         Inventory;
+       };
+ };
+type R_3 = 
  variant {
    err: text;
    ok: Inventory;
  };
-type Result_2 = 
+type R_2 = 
  variant {
    err: text;
    ok: vec record {
@@ -28,12 +36,12 @@ type Result_2 =
              nat;
            };
  };
-type Result_1 = 
+type R_1 = 
  variant {
    err: text;
    ok: Player;
  };
-type Result = 
+type R = 
  variant {
    err: text;
    ok: nat;
@@ -130,7 +138,7 @@ service : {
               nat;
               nat;
               nat;
-            }, nat) -> (Result);
+            }, nat) -> (R);
   claimOwner: () -> (principal);
   getCrops: () -> (vec record {
                          nat;
@@ -143,15 +151,15 @@ service : {
                             nat;
                           };
                         }) query;
-  harvest: (vec nat) -> (Result_4);
-  initPlayer: (text, text) -> (Result_1);
-  inventory: () -> (Result_3) query;
+  harvest: (vec nat) -> (R_5);
+  initPlayer: (text, text) -> (R_4);
+  inventory: () -> (R_3) query;
   listGameMasters: () -> (vec principal) query;
   plant: (vec record {
                 nat;
                 nat;
-              }) -> (Result_2);
-  queryPlayer: (principal) -> (Result_1) query;
+              }) -> (R_2);
+  queryPlayer: (principal) -> (R_1) query;
   queryPlots: (vec nat) -> (vec record {
                                   nat;
                                   opt Plot;
@@ -162,7 +170,7 @@ service : {
                nat;
                nat;
                nat;
-             }, nat) -> (Result);
+             }, nat) -> (R);
   transferOwner: (principal) -> (principal);
   updateCrop: (nat, Crop) -> ();
   updatePrices: (nat, record {

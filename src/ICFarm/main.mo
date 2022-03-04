@@ -29,7 +29,7 @@ actor ICFarm {
 
   type Map<K, V> = Trie.Trie<K, V>;
   type Set<E> = TrieSet.Set<E>;
-  type Result<V, E> = Result.Result<V, E>;
+  type R<V> = Result.Result<V, Text>;
 
 
   // Functions
@@ -42,6 +42,7 @@ actor ICFarm {
 
   // Consts
   let INIT_PLOTS = 8;
+  let INIT_TOKENS = 1000;
 
   /********************
       Authorizaton
@@ -195,6 +196,30 @@ actor ICFarm {
   // State
   stable var inventories: Map<Principal, Inventory> = emptyMap();
 
+  // Helper
+  private func initInventory(userId: Principal): Inventory {
+    let inventory = { tokens = INIT_TOKENS; crops = emptyMap() };
+    inventories := userMap.putKeyValue<Inventory>(inventories, userId, inventory);
+    inventory
+  };
+
+  /********************
+        Trade
+  ********************/
+  // API
+  public shared({ caller }) func buy(list: [(Nat, Nat, Nat)], tokens: Nat): async R<Nat> {
+    #err("ERR_NOT_IMPLEMENTED")
+  };
+
+  public shared({ caller }) func sell(list: [(Nat, Nat, Nat)], tokens: Nat): async R<Nat> {
+    #err("ERR_NOT_IMPLEMENTED")
+  };
+
+  public shared query({ caller }) func inventory(): async R<Inventory> {
+    #err("ERR_NOT_IMPLEMENTED")
+  };
+
+
 
   /********************
       Player Access
@@ -207,38 +232,22 @@ actor ICFarm {
   private let userMap = LT.forKey<Principal>(Principal.hash, Principal.equal);
 
   // API
-  public shared query({ caller }) func queryPlayer(userId: Principal): async Result<Player, Text> {
+  public shared query({ caller }) func queryPlayer(userId: Principal): async R<Player> {
     switch (userMap.getValue<Player>(players, userId)) {
       case (?player) { #ok(player) };
       case (_) { #err("ERR_USER_NOT_FOUND") };
     }
   };
 
-  public shared({ caller }) func initPlayer(name: Text, avatar: Text): async Result<Player, Text> {
+  public shared({ caller }) func initPlayer(name: Text, avatar: Text): async R<(Player, Inventory)> {
     switch (userMap.getValue<Player>(players, caller)) {
       case (?player) { #err("ERR_USER_EXISTS") };
       case (_) {
         let player: Player = { name = name; avatar = avatar; plotIds = allocatePlots(caller, INIT_PLOTS) };
         players := userMap.putKeyValue<Player>(players, caller, player);
-        #ok(player)
+        #ok((player, initInventory(caller)))
       }
     }
-  };
-
-  /********************
-        Trade
-  ********************/
-  // API
-  public shared({ caller }) func buy(list: [(Nat, Nat, Nat)], tokens: Nat): async Result<Nat, Text> {
-    #err("ERR_NOT_IMPLEMENTED")
-  };
-
-  public shared({ caller }) func sell(list: [(Nat, Nat, Nat)], tokens: Nat): async Result<Nat, Text> {
-    #err("ERR_NOT_IMPLEMENTED")
-  };
-
-  public shared query({ caller }) func inventory(): async Result<Inventory, Text> {
-    #err("ERR_NOT_IMPLEMENTED")
   };
 
 
@@ -247,11 +256,11 @@ actor ICFarm {
   ********************/
 
   // API
-  public shared({ caller }) func plant(tasks: [(Nat, Nat)]): async Result<[(Nat, Nat)], Text> {
+  public shared({ caller }) func plant(tasks: [(Nat, Nat)]): async R<[(Nat, Nat)]> {
     #err("ERR_NOT_IMPLEMENTED")
   };
 
-  public shared({ caller }) func harvest(tasks: [Nat]): async Result<[(Nat, Nat, Nat, Nat)], Text> {
+  public shared({ caller }) func harvest(tasks: [Nat]): async R<[(Nat, Nat, Nat, Nat)]> {
     #err("ERR_NOT_IMPLEMENTED")
   };
 
