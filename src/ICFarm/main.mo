@@ -16,6 +16,7 @@ import LL "lambda/Logical";
 import LC "lambda/Compare";
 import LTS "lambda/TrieSet";
 import LT "lambda/Trie";
+import LN "lambda/Nat";
 
 actor ICFarm {
   /********************
@@ -52,6 +53,8 @@ actor ICFarm {
   let ERR_USER_EXISTS = "ERR_USER_EXISTS";
   let ERR_USER_NOT_FOUND = "ERR_USER_NOT_FOUND";
   let ERR_INVALID_CROP = "ERR_INVALID_CROP";
+  let ERR_INSUFFICIENT_TOKENS = "ERR_INSUFFICIENT_TOKENS";
+  let ERR_PRICE_CHANGED = "ERR_PRICE_CHANGED";
 
   // State
   stable var owner: Principal = Principal.fromBlob("\04");
@@ -85,14 +88,11 @@ actor ICFarm {
     plotOwners := foldLeft<Nat, Map<Nat, Principal>>(
       newPlots,
       plotOwners,
-      natMap.putMapping<Principal>(const(owner)));
+      natMap.alter<Principal>(const(const(?owner))));
     plots := foldLeft<Nat, Map<Nat, Plot>>(
       newPlots,
       plots,
-      natMap.putMapping<Plot>(func (_): Plot = {
-        cropId = null;
-        timestamp = timestamp;
-      }));
+      natMap.alter<Plot>(const(const(?{ cropId = null; timestamp; }))));
     newPlots
   };
 
@@ -101,6 +101,38 @@ actor ICFarm {
     inventories := userMap.putKeyValue<Inventory>(inventories, userId, inventory);
     inventory
   };
+
+  private func priceForList(list: [(Nat, Nat, Nat)]): R<Nat> {
+    foldLeft<(Nat, Nat, Nat), R<Nat>>(list, #ok(0), func (t, (cropId, pCount, sCount)) {
+      Result.chain<Nat, Nat, Text>(t, func (tk) {
+        switch (natMap.getValue(cropPrices, cropId)) {
+          case (?(pPrice, sPrice)) { #ok(tk + pPrice * pCount + sPrice * sCount) };
+          case (_) { #err(ERR_INVALID_CROP) };
+        }
+      })
+    })
+  };
+
+
+  private func calcCrops(f: (Nat, Nat) -> Nat)
+    : (R<Map<Nat, (Nat, Nat)>>, (Nat, Nat, Nat)) -> R<Map<Nat, (Nat, Nat)>> {
+    func ( crops, (cropId, pCount, sCount)): R<Map<Nat, (Nat, Nat)>> {
+      switch crops {
+        case (#err(msg)) { #err(msg) };
+        case (#ok(c)) {
+          switch (natMap.getValue(c, cropId)) {
+            case (?(productCount, seedCount)) {
+              #ok(natMap.putKeyValue(c, cropId, (productCount + pCount, seedCount + sCount)))
+            };
+            case (_) {
+              #err(ERR_INVALID_CROP)
+            }
+          }
+        };
+      }
+    }
+  };
+
 
   // API
 
@@ -227,16 +259,75 @@ actor ICFarm {
         Trade
   ********************/
 
-  public shared({ caller }) func buy(list: [(Nat, Nat, Nat)], tokens: Nat): async R<Nat> {
-    #err("ERR_NOT_IMPLEMENTED")
+  public shared({ caller }) func buy(list: [(Nat, Nat, Nat)], tokens: Nat): async R<Inventory> {
+    switch (userMap.getValue<Inventory>(inventories, caller)) {
+      case (null) {#err(ERR_USER_NOT_FOUND) };
+      case (?inventory) {
+        if (inventory.tokens < tokens) {
+          #err(ERR_INSUFFICIENT_TOKENS)
+        } else {
+          Result.chain<Nat, Inventory, Text>(
+            priceForList(list),
+            func (realtimePrice) {
+              if (realtimePrice > tokens) {
+                #err(ERR_PRICE_CHANGED)
+              } else {
+                let (tokens, _) = LN.safeSub(inventory.tokens, realtimePrice);
+                Result.chain<Map<Nat, (Nat, Nat)>, Inventory, Text>(
+                  foldLeft(list, #ok(inventory.crops), calcCrops(func (a, b) = a + b)),
+                  func (crops) {
+                    let newInventory = { tokens; crops };
+                    inventories := userMap.putKeyValue<Inventory>(inventories, caller, newInventory);
+                    #ok(newInventory)
+                  }
+                )
+              }
+            }
+          )
+        }
+      };
+    }
   };
 
   public shared({ caller }) func sell(list: [(Nat, Nat, Nat)], tokens: Nat): async R<Nat> {
     #err("ERR_NOT_IMPLEMENTED")
+    // switch (userMap.getValue<Inventory>(inventories, caller)) {
+    //   case (null) {#err(ERR_USER_NOT_FOUND) };
+    //   case (?inventory) {
+    //     Result.chain<Nat, Inventory, Text>()
+    //     priceForList
+    //     if (inventory.tokens < tokens) {
+    //       #err(ERR_INSUFFICIENT_TOKENS)
+    //     } else {
+    //       Result.chain<Nat, Inventory, Text>(
+    //         priceForList(list),
+    //         func (realtimePrice) {
+    //           if (realtimePrice > tokens) {
+    //             #err(ERR_PRICE_CHANGED)
+    //           } else {
+    //             let (tokens, _) = LN.safeSub(inventory.tokens, realtimePrice);
+    //             Result.chain<Map<Nat, (Nat, Nat)>, Inventory, Text>(
+    //               foldLeft(list, #ok(inventory.crops), calcCrops(func (a, b) = a + b)),
+    //               func (crops) {
+    //                 let newInventory = { tokens; crops };
+    //                 inventories := userMap.putKeyValue<Inventory>(inventories, caller, newInventory);
+    //                 #ok(newInventory)
+    //               }
+    //             )
+    //           }
+    //         }
+    //       )
+    //     }
+    //   };
+    // }
+
   };
 
   public shared query({ caller }) func inventory(): async R<Inventory> {
-    #err("ERR_NOT_IMPLEMENTED")
+    switch (userMap.getValue<Inventory>(inventories, caller)) {
+      case (?inventory) { #ok(inventory) };
+      case (_) { #err(ERR_USER_NOT_FOUND) };
+    }
   };
 
   /********************
@@ -246,13 +337,13 @@ actor ICFarm {
   public shared query({ caller }) func queryPlayer(userId: Principal): async R<Player> {
     switch (userMap.getValue<Player>(players, userId)) {
       case (?player) { #ok(player) };
-      case (_) { #err("ERR_USER_NOT_FOUND") };
+      case (_) { #err(ERR_USER_NOT_FOUND) };
     }
   };
 
   public shared({ caller }) func initPlayer(name: Text, avatar: Text): async R<(Player, Inventory)> {
     switch (userMap.getValue<Player>(players, caller)) {
-      case (?player) { #err("ERR_USER_EXISTS") };
+      case (?player) { #err(ERR_USER_EXISTS) };
       case (_) {
         let player: Player = { name = name; avatar = avatar; plotIds = allocatePlots(caller, INIT_PLOTS) };
         players := userMap.putKeyValue<Player>(players, caller, player);

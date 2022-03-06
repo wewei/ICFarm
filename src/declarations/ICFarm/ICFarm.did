@@ -180,7 +180,7 @@ service : {
               nat;
               nat;
               nat;
-            }, nat) -> (R_2);
+            }, nat) -> (R_7);
   claimOwner: () -> (R_1);
   getCrops: () -> (R_11) query;
   getPrices: () -> (R_10) query;

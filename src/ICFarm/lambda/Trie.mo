@@ -6,18 +6,23 @@ module {
   private type Hash = Hash.Hash;
 
   public let forKey = func<K>(hash: K -> Hash, equal: (K, K) -> Bool): {
+    replace: <V>(Map<K, V>, K, ?V) -> (Map<K, V>, ?V);
     putKeyValue: <V>(Map<K, V>, K, V) -> Map<K, V>;
     getValue: <V>(Map<K, V>, K) -> ?V;
     delKey: <V>(Map<K, V>, K) -> Map<K, V>;
     keys: <V>(Map<K, V>) -> [K];
     values: <V>(Map<K, V>) -> [V];
     entries: <V>(Map<K, V>) -> [(K, V)];
-    putMapping: <V>(K -> V) -> (Map<K, V>, K) -> Map<K, V>;
+    alter: <V>(K -> ?V -> ?V) -> (Map<K, V>, K) -> Map<K, V>;
   } = object {
 
-    public func putKeyValue<V>(map: Map<K, V>, key: K, value: V): Map<K, V> {
+    public func replace<V>(map: Map<K, V>, key: K, value: ?V): (Map<K, V>, ?V) {
       let keyObj = { key = key; hash = hash(key) };
-      let (result, _) = Trie.put<K, V>(map, keyObj, equal, value);
+      Trie.replace(map, keyObj, equal, value)
+    };
+
+    public func putKeyValue<V>(map: Map<K, V>, key: K, value: V): Map<K, V> {
+      let (result, _) = replace(map, key, ?value);
       result
     };
 
@@ -44,8 +49,11 @@ module {
       Trie.toArray<K, V, (K, V)>(map, func (k, v) = (k, v))
     };
 
-    public func putMapping<V>(mapping: K -> V): (Map<K, V>, K) -> Map<K, V> {
-      func (map, key) = putKeyValue(map, key, mapping(key))
+    public func alter<V>(f: K -> ?V -> ?V): (Map<K, V>, K) -> Map<K, V> {
+      func (map, key) {
+        let (result, _) = replace(map, key, f(key)(getValue<V>(map, key)));
+        result
+      }
     };
   };
 }

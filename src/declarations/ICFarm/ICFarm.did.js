@@ -19,24 +19,6 @@ export const idlFactory = ({ IDL }) => {
   });
   const R_2 = IDL.Variant({ 'ok' : IDL.Nat, 'err' : IDL.Text });
   const R_3 = IDL.Variant({ 'ok' : IDL.Vec(IDL.Principal), 'err' : IDL.Text });
-  const R_1 = IDL.Variant({ 'ok' : IDL.Principal, 'err' : IDL.Text });
-  const R_11 = IDL.Variant({
-    'ok' : IDL.Vec(IDL.Tuple(IDL.Nat, Crop)),
-    'err' : IDL.Text,
-  });
-  const R_10 = IDL.Variant({
-    'ok' : IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Tuple(IDL.Nat, IDL.Nat))),
-    'err' : IDL.Text,
-  });
-  const R_9 = IDL.Variant({
-    'ok' : IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat)),
-    'err' : IDL.Text,
-  });
-  const Player = IDL.Record({
-    'name' : IDL.Text,
-    'plotIds' : IDL.Vec(IDL.Nat),
-    'avatar' : IDL.Text,
-  });
   const Hash = IDL.Nat32;
   const Key = IDL.Record({ 'key' : IDL.Nat, 'hash' : Hash });
   List.fill(
@@ -58,11 +40,29 @@ export const idlFactory = ({ IDL }) => {
     'empty' : IDL.Null,
   });
   const Inventory = IDL.Record({ 'crops' : Map, 'tokens' : IDL.Nat });
+  const R_7 = IDL.Variant({ 'ok' : Inventory, 'err' : IDL.Text });
+  const R_1 = IDL.Variant({ 'ok' : IDL.Principal, 'err' : IDL.Text });
+  const R_11 = IDL.Variant({
+    'ok' : IDL.Vec(IDL.Tuple(IDL.Nat, Crop)),
+    'err' : IDL.Text,
+  });
+  const R_10 = IDL.Variant({
+    'ok' : IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Tuple(IDL.Nat, IDL.Nat))),
+    'err' : IDL.Text,
+  });
+  const R_9 = IDL.Variant({
+    'ok' : IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat)),
+    'err' : IDL.Text,
+  });
+  const Player = IDL.Record({
+    'name' : IDL.Text,
+    'plotIds' : IDL.Vec(IDL.Nat),
+    'avatar' : IDL.Text,
+  });
   const R_8 = IDL.Variant({
     'ok' : IDL.Tuple(Player, Inventory),
     'err' : IDL.Text,
   });
-  const R_7 = IDL.Variant({ 'ok' : Inventory, 'err' : IDL.Text });
   const R_6 = IDL.Variant({
     'ok' : IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat)),
     'err' : IDL.Text,
@@ -80,7 +80,7 @@ export const idlFactory = ({ IDL }) => {
     'addGameMasters' : IDL.Func([IDL.Vec(IDL.Principal)], [R_3], []),
     'buy' : IDL.Func(
         [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat, IDL.Nat)), IDL.Nat],
-        [R_2],
+        [R_7],
         [],
       ),
     'claimOwner' : IDL.Func([], [R_1], []),

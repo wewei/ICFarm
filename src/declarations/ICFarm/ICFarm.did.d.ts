@@ -63,7 +63,7 @@ export interface _SERVICE {
   'addCrop' : (arg_0: Crop) => Promise<R_2>,
   'addGameMasters' : (arg_0: Array<Principal>) => Promise<R_3>,
   'buy' : (arg_0: Array<[bigint, bigint, bigint]>, arg_1: bigint) => Promise<
-      R_2
+      R_7
     >,
   'claimOwner' : () => Promise<R_1>,
   'getCrops' : () => Promise<R_11>,
