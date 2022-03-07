@@ -11,6 +11,7 @@ import Int "mo:base/Int";
 import Nat "mo:base/Nat";
 import Hash "mo:base/Hash";
 import Func "mo:base/Func";
+import List "mo:base/List";
 
 import Types "Types";
 import LL "lambda/Logical";
@@ -19,6 +20,8 @@ import LTS "lambda/TrieSet";
 import LT "lambda/Trie";
 import LN "lambda/Nat";
 import LR "lambda/Result";
+
+import Authorization "Authorization";
 
 actor ICFarm {
   /********************
@@ -51,7 +54,6 @@ actor ICFarm {
   let ERR_NOT_IMPLEMENTED = "ERR_NOT_IMPLEMENTED";
   let ERR_UNAUTHORIZED = "ERR_UNAUTHORIZED";
   let ERR_INVALID_USER = "ERR_INVALID_USER";
-  let ERR_CANNOT_RESIGN = "ERR_CANNOT_RESIGN";
   let ERR_USER_EXISTS = "ERR_USER_EXISTS";
   let ERR_USER_NOT_FOUND = "ERR_USER_NOT_FOUND";
   let ERR_INVALID_CROP = "ERR_INVALID_CROP";
@@ -119,31 +121,13 @@ actor ICFarm {
   };
 
 
-  private func calcCrops(f: (Nat, Nat) -> Nat)
-    : (R<Map<Nat, (Nat, Nat)>>, (Nat, Nat, Nat)) -> R<Map<Nat, (Nat, Nat)>> {
-    func ( crops, (cropId, pCount, sCount)): R<Map<Nat, (Nat, Nat)>> {
-      switch crops {
-        case (#err(msg)) { #err(msg) };
-        case (#ok(c)) {
-          switch (natMap.getValue(c, cropId)) {
-            case (?(productCount, seedCount)) {
-              #ok(natMap.putKeyValue(c, cropId, (productCount + pCount, seedCount + sCount)))
-            };
-            case (_) {
-              #err(ERR_INVALID_CROP)
-            }
-          }
-        };
-      }
-    }
-  };
-
-
   // API
 
   /********************
-      Authorizaton
+      Authorization
   ********************/
+
+  private let auth = Authorization.Authorization();
 
   public shared query({ caller }) func listGameMasters() : async R<[Principal]> {
     if (isAnonymous(caller)) {
@@ -154,54 +138,47 @@ actor ICFarm {
   };
 
   public shared({ caller }) func claimOwner() : async R<Principal> {
-    if (isAnonymous(caller) or not isAnonymous(owner)) {
-      #err(ERR_UNAUTHORIZED)
-    } else {
-      owner := caller;
-      #ok(caller)
-    }
+    auth.claimOwner({ caller }, { owner }, func (result) {
+      owner := result.owner;
+      owner
+    })
   };
 
   public shared({ caller }) func transferOwner(userId: Principal): async R<Principal> {
-    if (not isOwner(caller)) {
-      #err(ERR_UNAUTHORIZED)
-    } else if (isAnonymous(userId)) {
-      #err(ERR_INVALID_USER)
-    } else {
-      owner := userId;
-      #ok(userId)
-    }
+    auth.transferOwner({ caller; userId }, { owner }, func (result) {
+      owner := result.owner;
+      owner
+    })
   };
 
   public shared({ caller }) func addGameMasters(userIds: [Principal]) : async R<[Principal]> {
-    if (not isOwnerOrGameMaster(caller)) {
-      #err(ERR_UNAUTHORIZED)
-    } else {
-      let newGameMasters: [Principal] = filter(userIds, LL.neither<Principal>(isGameMaster)(isAnonymous));
-      gameMasters := foldLeft(newGameMasters, gameMasters, principalSet.addElement);
-      #ok(newGameMasters)
-    }
+    auth.addGameMasters({
+      caller; owner;
+      userIds = List.fromArray(userIds);
+    }, {
+      gameMasters;
+    }, func (result) {
+      gameMasters := result.gameMasters;
+      TrieSet.toArray(gameMasters)
+    })
   };
 
   public shared({ caller }) func removeGameMasters(userIds: [Principal]) : async R<[Principal]> {
-    if (not isOwner(caller)) {
-      #err(ERR_UNAUTHORIZED)
-    } else {
-      let removingGameMasters: [Principal] = filter(userIds, isGameMaster);
-      gameMasters := foldLeft(removingGameMasters, gameMasters, principalSet.delElement);
-      #ok(removingGameMasters)
-    }
+    auth.removeGameMasters({
+      caller; owner;
+      userIds = List.fromArray(userIds);
+    }, {
+      gameMasters;
+    }, func (result) {
+      gameMasters := result.gameMasters;
+      TrieSet.toArray(gameMasters)
+    })
   };
 
   public shared({ caller }) func resignGameMaster() : async R<()> {
-    if (isOwner(caller)) {
-      #err(ERR_CANNOT_RESIGN)
-    } else if (not isGameMaster(caller)) {
-      #err(ERR_UNAUTHORIZED)
-    } else {
-      gameMasters := principalSet.delElement(gameMasters, caller);
-      #ok()
-    }
+    auth.resignGameMaster({ caller }, { gameMasters }, func (result) {
+      gameMasters := result.gameMasters;
+    })
   };
 
   /********************
