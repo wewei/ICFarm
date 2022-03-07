@@ -35,11 +35,11 @@ export type R = { 'ok' : null } |
   { 'err' : string };
 export type R_1 = { 'ok' : Principal } |
   { 'err' : string };
-export type R_10 = { 'ok' : Array<[bigint, [bigint, bigint]]> } |
+export type R_10 = { 'ok' : Array<[bigint, Crop]> } |
   { 'err' : string };
-export type R_11 = { 'ok' : Array<[bigint, Crop]> } |
+export type R_11 = { 'ok' : bigint } |
   { 'err' : string };
-export type R_2 = { 'ok' : bigint } |
+export type R_2 = { 'ok' : Inventory } |
   { 'err' : string };
 export type R_3 = { 'ok' : Array<Principal> } |
   { 'err' : string };
@@ -49,28 +49,28 @@ export type R_5 = { 'ok' : Player } |
   { 'err' : string };
 export type R_6 = { 'ok' : Array<[bigint, bigint]> } |
   { 'err' : string };
-export type R_7 = { 'ok' : Inventory } |
+export type R_7 = { 'ok' : [Player, Inventory] } |
   { 'err' : string };
-export type R_8 = { 'ok' : [Player, Inventory] } |
+export type R_8 = { 'ok' : Array<[bigint, bigint, bigint, bigint]> } |
   { 'err' : string };
-export type R_9 = { 'ok' : Array<[bigint, bigint, bigint, bigint]> } |
+export type R_9 = { 'ok' : Array<[bigint, [bigint, bigint]]> } |
   { 'err' : string };
 export type Time = bigint;
 export type Trie = { 'branch' : Branch } |
   { 'leaf' : Leaf } |
   { 'empty' : null };
 export interface _SERVICE {
-  'addCrop' : (arg_0: Crop) => Promise<R_2>,
+  'addCrop' : (arg_0: Crop) => Promise<R_11>,
   'addGameMasters' : (arg_0: Array<Principal>) => Promise<R_3>,
   'buy' : (arg_0: Array<[bigint, bigint, bigint]>, arg_1: bigint) => Promise<
-      R_7
+      R_2
     >,
   'claimOwner' : () => Promise<R_1>,
-  'getCrops' : () => Promise<R_11>,
-  'getPrices' : () => Promise<R_10>,
-  'harvest' : (arg_0: Array<bigint>) => Promise<R_9>,
-  'initPlayer' : (arg_0: string, arg_1: string) => Promise<R_8>,
-  'inventory' : () => Promise<R_7>,
+  'getCrops' : () => Promise<R_10>,
+  'getPrices' : () => Promise<R_9>,
+  'harvest' : (arg_0: Array<bigint>) => Promise<R_8>,
+  'initPlayer' : (arg_0: string, arg_1: string) => Promise<R_7>,
+  'inventory' : () => Promise<R_2>,
   'listGameMasters' : () => Promise<R_3>,
   'plant' : (arg_0: Array<[bigint, bigint]>) => Promise<R_6>,
   'queryPlayer' : (arg_0: Principal) => Promise<R_5>,

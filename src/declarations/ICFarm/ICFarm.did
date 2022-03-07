@@ -10,23 +10,29 @@ type R_9 =
    err: text;
    ok: vec record {
              nat;
+             record {
+               nat;
+               nat;
+             };
+           };
+ };
+type R_8 = 
+ variant {
+   err: text;
+   ok: vec record {
+             nat;
              nat;
              nat;
              nat;
            };
  };
-type R_8 = 
+type R_7 = 
  variant {
    err: text;
    ok: record {
          Player;
          Inventory;
        };
- };
-type R_7 = 
- variant {
-   err: text;
-   ok: Inventory;
  };
 type R_6 = 
  variant {
@@ -57,25 +63,19 @@ type R_3 =
 type R_2 = 
  variant {
    err: text;
-   ok: nat;
+   ok: Inventory;
  };
 type R_11 = 
  variant {
    err: text;
-   ok: vec record {
-             nat;
-             Crop;
-           };
+   ok: nat;
  };
 type R_10 = 
  variant {
    err: text;
    ok: vec record {
              nat;
-             record {
-               nat;
-               nat;
-             };
+             Crop;
            };
  };
 type R_1 = 
@@ -174,19 +174,19 @@ type AssocList =
        List;
      };
 service : {
-  addCrop: (Crop) -> (R_2);
+  addCrop: (Crop) -> (R_11);
   addGameMasters: (vec principal) -> (R_3);
   buy: (vec record {
               nat;
               nat;
               nat;
-            }, nat) -> (R_7);
+            }, nat) -> (R_2);
   claimOwner: () -> (R_1);
-  getCrops: () -> (R_11) query;
-  getPrices: () -> (R_10) query;
-  harvest: (vec nat) -> (R_9);
-  initPlayer: (text, text) -> (R_8);
-  inventory: () -> (R_7) query;
+  getCrops: () -> (R_10) query;
+  getPrices: () -> (R_9) query;
+  harvest: (vec nat) -> (R_8);
+  initPlayer: (text, text) -> (R_7);
+  inventory: () -> (R_2) query;
   listGameMasters: () -> (R_3) query;
   plant: (vec record {
                 nat;
