@@ -1,0 +1,210 @@
+type Trie = 
+ variant {
+   branch: Branch;
+   "empty";
+   leaf: Leaf;
+ };
+type Time = int;
+type R_9 = 
+ variant {
+   err: text;
+   ok: vec record {
+             nat;
+             record {
+               nat;
+               nat;
+             };
+           };
+ };
+type R_8 = 
+ variant {
+   err: text;
+   ok: vec record {
+             nat;
+             nat;
+             nat;
+             nat;
+           };
+ };
+type R_7 = 
+ variant {
+   err: text;
+   ok: record {
+         Player;
+         Inventory;
+       };
+ };
+type R_6 = 
+ variant {
+   err: text;
+   ok: vec record {
+             nat;
+             nat;
+           };
+ };
+type R_5 = 
+ variant {
+   err: text;
+   ok: Player;
+ };
+type R_4 = 
+ variant {
+   err: text;
+   ok: vec record {
+             nat;
+             opt Plot;
+           };
+ };
+type R_3 = 
+ variant {
+   err: text;
+   ok: vec principal;
+ };
+type R_2 = 
+ variant {
+   err: text;
+   ok: Inventory;
+ };
+type R_11 = 
+ variant {
+   err: text;
+   ok: nat;
+ };
+type R_10 = 
+ variant {
+   err: text;
+   ok: vec record {
+             nat;
+             Crop;
+           };
+ };
+type R_1 = 
+ variant {
+   err: text;
+   ok: principal;
+ };
+type R = 
+ variant {
+   err: text;
+   ok;
+ };
+type Plot = 
+ record {
+   cropId: opt nat;
+   timestamp: Time;
+ };
+type Player = 
+ record {
+   avatar: text;
+   name: text;
+   plotIds: vec nat;
+ };
+type Map = 
+ variant {
+   branch: Branch;
+   "empty";
+   leaf: Leaf;
+ };
+type List = 
+ opt record {
+       record {
+         Key;
+         record {
+           nat;
+           nat;
+         };
+       };
+       List;
+     };
+type Leaf = 
+ record {
+   keyvals: AssocList;
+   size: nat;
+ };
+type Key = 
+ record {
+   hash: Hash;
+   key: nat;
+ };
+type Inventory = 
+ record {
+   crops: Map;
+   tokens: nat;
+ };
+type Hash = nat32;
+type CropPhase = 
+ record {
+   image: text;
+   name: text;
+   period: nat;
+ };
+type Crop = 
+ record {
+   phases: vec CropPhase;
+   productImage: text;
+   productName: text;
+   productPrice: nat;
+   productRange: record {
+                   nat;
+                   nat;
+                 };
+   seedImage: text;
+   seedName: text;
+   seedPrice: nat;
+   seedRange: record {
+                nat;
+                nat;
+              };
+ };
+type Branch = 
+ record {
+   left: Trie;
+   right: Trie;
+   size: nat;
+ };
+type AssocList = 
+ opt record {
+       record {
+         Key;
+         record {
+           nat;
+           nat;
+         };
+       };
+       List;
+     };
+service : {
+  addCrop: (Crop) -> (R_11);
+  addGameMasters: (vec principal) -> (R_3);
+  buy: (vec record {
+              nat;
+              nat;
+              nat;
+            }, nat) -> (R_2);
+  claimOwner: () -> (R_1);
+  getCrops: () -> (R_10) query;
+  getPrices: () -> (R_9) query;
+  harvest: (vec nat) -> (R_8);
+  initPlayer: (text, text) -> (R_7);
+  inventory: () -> (R_2) query;
+  listGameMasters: () -> (R_3) query;
+  plant: (vec record {
+                nat;
+                nat;
+              }) -> (R_6);
+  queryPlayer: (principal) -> (R_5) query;
+  queryPlots: (vec nat) -> (R_4) query;
+  removeGameMasters: (vec principal) -> (R_3);
+  resignGameMaster: () -> (R);
+  sell: (vec record {
+               nat;
+               nat;
+               nat;
+             }, nat) -> (R_2);
+  transferOwner: (principal) -> (R_1);
+  updateCrop: (nat, Crop) -> (R);
+  updatePrices: (nat, record {
+                        nat;
+                        nat;
+                      }) -> (R);
+}
