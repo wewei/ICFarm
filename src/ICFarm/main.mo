@@ -21,6 +21,7 @@ import LT "lambda/Trie";
 import LN "lambda/Nat";
 import LR "lambda/Result";
 
+import State "State";
 import Authorization "Authorization";
 
 actor ICFarm {
@@ -32,6 +33,7 @@ actor ICFarm {
   type Crop = Types.Crop;
   type Plot = Types.Plot;
   type Inventory = Types.Inventory;
+  type State<S> = State.State<S>;
 
   type Map<K, V> = Trie.Trie<K, V>;
   type Set<E> = TrieSet.Set<E>;
@@ -127,58 +129,48 @@ actor ICFarm {
       Authorization
   ********************/
 
-  private let auth = Authorization.Authorization();
+  private let authorization = Authorization.Authorization();
 
-  public shared query({ caller }) func listGameMasters() : async R<[Principal]> {
-    if (isAnonymous(caller)) {
-      #err(ERR_UNAUTHORIZED)
-    } else {
-      #ok(TrieSet.toArray(gameMasters))
-    }
+  private let useOwner = func (): State<{
+    owner: Principal;
+  }> = ({ owner }, func (result) {
+    owner := result.owner;
+  });
+
+  private let useGameMaster = func (): State<{
+    gameMasters: Set<Principal>;
+  }> = ({ gameMasters }, func (result) {
+    gameMasters := result.gameMasters;
+  });
+
+  public shared query({ caller }) func getGameMasters() : async R<[Principal]> {
+    authorization.getGameMasters({ caller; gameMasters })
   };
 
-  public shared({ caller }) func claimOwner() : async R<Principal> {
-    auth.claimOwner({ caller }, { owner }, func (result) {
-      owner := result.owner;
-      owner
-    })
+  public shared({ caller }) func claimOwner() : async R<()> {
+    authorization.claimOwner({ caller })(useOwner())
   };
 
-  public shared({ caller }) func transferOwner(userId: Principal): async R<Principal> {
-    auth.transferOwner({ caller; userId }, { owner }, func (result) {
-      owner := result.owner;
-      owner
-    })
+  public shared({ caller }) func transferOwner(userId: Principal): async R<()> {
+    authorization.transferOwner({ caller; userId })(useOwner())
   };
 
-  public shared({ caller }) func addGameMasters(userIds: [Principal]) : async R<[Principal]> {
-    auth.addGameMasters({
+  public shared({ caller }) func addGameMasters(userIds: [Principal]) : async R<()> {
+    authorization.addGameMasters({
       caller; owner;
       userIds = List.fromArray(userIds);
-    }, {
-      gameMasters;
-    }, func (result) {
-      gameMasters := result.gameMasters;
-      TrieSet.toArray(gameMasters)
-    })
+    })(useGameMaster())
   };
 
-  public shared({ caller }) func removeGameMasters(userIds: [Principal]) : async R<[Principal]> {
-    auth.removeGameMasters({
+  public shared({ caller }) func removeGameMasters(userIds: [Principal]) : async R<()> {
+    authorization.removeGameMasters({
       caller; owner;
       userIds = List.fromArray(userIds);
-    }, {
-      gameMasters;
-    }, func (result) {
-      gameMasters := result.gameMasters;
-      TrieSet.toArray(gameMasters)
-    })
+    })(useGameMaster())
   };
 
   public shared({ caller }) func resignGameMaster() : async R<()> {
-    auth.resignGameMaster({ caller }, { gameMasters }, func (result) {
-      gameMasters := result.gameMasters;
-    })
+    authorization.resignGameMaster({ caller })(useGameMaster())
   };
 
   /********************

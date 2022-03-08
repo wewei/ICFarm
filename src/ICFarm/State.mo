@@ -1,18 +1,17 @@
 import Result "mo:base/Result";
 
 module {
-  public type Updater<P, S, R, E> = (P, S, (S -> R)) -> Result.Result<R, E>;
+  public type State<S> = (S, S -> ());
+  public type Getter<P, R, E> = P -> Result.Result<R, E>;
+  public type Setter<P, S, E> = P -> (State<S>) -> Result.Result<(), E>;
 
-  public func updater<P, S, R, E>(
+  public func setter<P, S, E>(
     callback: (P, S) -> Result.Result<S, E>,
-  ): Updater<P, S, R, E> {
-    func (props, state, update) {
-      Result.chain<S, R, E>(
+  ): Setter<P, S, E> {
+    func (props) = func((state, setState)) =
+      Result.chain<S, (), E>(
         callback(props, state),
-        func (state) {
-          #ok(update(state))
-        }
-      )
-    }
-  }
+        func (state) = #ok(setState(state))
+      );
+  };
 }

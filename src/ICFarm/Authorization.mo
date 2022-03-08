@@ -18,13 +18,23 @@ module {
     private let isAnonymous = Principal.isAnonymous;
     private let userSet = LTS.forType<Principal>(Principal.hash, Principal.equal);
 
-    public let claimOwner = State.updater<{
+    public let getGameMasters: State.Getter<{
+      caller: Principal;
+      gameMasters: Set<Principal>;
+    }, [Principal], Text> =
+      func ({ caller; gameMasters }) =
+        if (isAnonymous(caller))
+          #err(ERR_UNAUTHORIZED)
+        else
+          #ok(TrieSet.toArray(gameMasters));
+
+    public let claimOwner = State.setter<{
       // props
       caller: Principal;
     }, {
       // states
       owner: Principal;
-    }, Principal, Text>(
+    }, Text>(
       func ({ caller }, { owner }) =
         if (isAnonymous(caller) or not isAnonymous(owner))
           #err(ERR_UNAUTHORIZED)
@@ -32,14 +42,14 @@ module {
           #ok({ owner = caller })
     );
 
-    public let transferOwner = State.updater<{
+    public let transferOwner = State.setter<{
       // props
       caller: Principal;
       userId: Principal;
     }, {
       // states
       owner: Principal;
-    }, Principal, Text>(
+    }, Text>(
       func ({ caller; userId }, { owner }) =
         if (caller != owner)
           #err(ERR_UNAUTHORIZED)
@@ -49,7 +59,7 @@ module {
           #ok({ owner = userId })
     );
 
-    public let addGameMasters = State.updater<{
+    public let addGameMasters = State.setter<{
       // props
       caller: Principal;
       owner: Principal;
@@ -57,7 +67,7 @@ module {
     }, {
       // states
       gameMasters: Set<Principal>;
-    }, [Principal], Text>(
+    }, Text>(
       func ({ caller; owner; userIds }, { gameMasters }) =
         if (caller == owner or userSet.contains(caller)(gameMasters)) 
           #ok({
@@ -67,7 +77,7 @@ module {
           #err(ERR_UNAUTHORIZED)
     );
 
-    public let removeGameMasters = State.updater<{
+    public let removeGameMasters = State.setter<{
       // props
       caller: Principal;
       owner: Principal;
@@ -75,7 +85,7 @@ module {
     }, {
       // states
       gameMasters: Set<Principal>;
-    }, [Principal], Text>(
+    }, Text>(
       func ({ caller; owner; userIds }, { gameMasters }) =
         if (caller == owner or userSet.contains(caller)(gameMasters))
           #ok({
@@ -85,13 +95,13 @@ module {
           #err(ERR_UNAUTHORIZED)
     );
 
-    public let resignGameMaster = State.updater<{
+    public let resignGameMaster = State.setter<{
       // props
       caller: Principal;
     }, {
       // states
       gameMasters: Set<Principal>;
-    }, (), Text>(
+    }, Text>(
       func ({ caller }, { gameMasters }) =
         if (userSet.contains(caller)(gameMasters))
           #ok({
